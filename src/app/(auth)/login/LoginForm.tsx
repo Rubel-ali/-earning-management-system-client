@@ -14,7 +14,7 @@ import { AppDispatch } from "@/redux/store";
 import { logOut, setUser } from "@/redux/ReduxFunction";
 
 type DecodedToken = {
-  role: string;
+  role: "SUPER_ADMIN" | "ADMIN" | "INSTRUCTOR" | "STUDENT";
   iat?: number;
   exp?: number;
 };
@@ -40,39 +40,69 @@ const LoginForm = () => {
       return;
     }
 
-    const { data, error } = await loginFun({ email, password });
+    try {
+      const res = await loginFun({ email, password }).unwrap();
 
-    if (error || !data?.data?.token) {
+      if (!res?.data?.token) {
+        throw new Error("Token not found");
+      }
+
+      const token = res.data.token;
+
+      let userInfo: DecodedToken;
+
+      try {
+        userInfo = jwtDecode<DecodedToken>(token);
+      } catch {
+        throw new Error("Invalid token");
+      }
+
+      const allowedRoles = [
+        "SUPER_ADMIN",
+        "ADMIN",
+        "INSTRUCTOR",
+        "STUDENT",
+      ];
+
+      if (!allowedRoles.includes(userInfo.role)) {
+        dispatch(logOut());
+        throw new Error("Unauthorized role");
+      }
+
+      // Save role in redux
+      dispatch(setUser({ role: userInfo.role }));
+
+      // Save token in cookie
+      Cookies.set("token", token, { expires: 7 });
+
+      // ✅ Correct Redirect According To Folder
+      switch (userInfo.role) {
+        case "SUPER_ADMIN":
+          router.push("/dashboard/super-admin");
+          break;
+
+        case "ADMIN":
+          router.push("/dashboard/admin");
+          break;
+
+        case "INSTRUCTOR":
+          router.push("/dashboard/instructor");
+          break;
+
+        case "STUDENT":
+          router.push("/dashboard/student");
+          break;
+
+        default:
+          router.push("/login");
+      }
+
+      ShowToastify({ success: "Login successful!" });
+    } catch (error) {
+      dispatch(logOut());
       ShowToastify({ error: "Check your email or password." });
       setLogIn("Login");
-      return;
     }
-
-    let userInfo: DecodedToken;
-
-    try {
-      userInfo = jwtDecode<DecodedToken>(data.data.token);
-    } catch {
-      ShowToastify({ error: "Invalid token received." });
-      setLogIn("Login");
-      return;
-    }
-
-    // ✅ Allow SUPER_ADMIN, STUDENT, INSTRUCTOR, ADMIN only
-    const allowedRoles = ["SUPER_ADMIN", "STUDENT", "INSTRUCTOR", "ADMIN"];
-
-    if (!allowedRoles.includes(userInfo.role)) {
-      ShowToastify({ error: "You are not authorized." });
-      dispatch(logOut());
-      setLogIn("Login");
-      return;
-    }
-
-    // ✅ name পুরোপুরি remove
-    dispatch(setUser({ role: userInfo.role }));
-
-    Cookies.set("token", data.data.token);
-    router.push("/");
   };
 
   return (
@@ -118,7 +148,6 @@ const LoginForm = () => {
         </div>
       </div>
 
-      {/* Links */}
       <div className="flex justify-between">
         <Link href="/forgetPassword" className="text-xs text-gray-500">
           Forgot password?
@@ -128,7 +157,6 @@ const LoginForm = () => {
         </Link>
       </div>
 
-      {/* Submit */}
       <button
         type="submit"
         className="w-full rounded-md bg-green-600 px-3 py-2 text-white"

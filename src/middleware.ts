@@ -4,35 +4,20 @@ import type { NextRequest } from "next/server";
 import { jwtDecode } from "jwt-decode";
 
 const roleAccess: Record<string, string[]> = {
-  // =============================
-  // COURSE ROUTES
-  // =============================
-  "/dashboard/courses/create": ["INSTRUCTOR"],
-  "/dashboard/courses/my-courses": ["STUDENT", "INSTRUCTOR"],
-  "/dashboard/courses": ["ADMIN", "SUPER_ADMIN", "INSTRUCTOR"],
+  "/dashboard/super-admin": ["SUPER_ADMIN"],
+  "/dashboard/users": ["ADMIN", "SUPER_ADMIN"],
 
-  // =============================
-  // VIDEO ROUTES
-  // =============================
-  "/dashboard/videos/create": ["INSTRUCTOR"],
-  "/dashboard/videos": ["INSTRUCTOR", "STUDENT", "SUPER_ADMIN"],
-
-  // =============================
-  // CATEGORY ROUTES
-  // =============================
-  "/dashboard/categories": ["ADMIN", "SUPER_ADMIN"],
-
-  // =============================
-  // INSTRUCTOR ANALYTICS
-  // =============================
+  "/dashboard/instructor": ["INSTRUCTOR"],
   "/dashboard/instructor/revenue": ["INSTRUCTOR"],
   "/dashboard/instructor/analytics": ["INSTRUCTOR"],
 
-  // =============================
-  // ADMIN / SUPER ADMIN
-  // =============================
-  "/dashboard/users": ["ADMIN", "SUPER_ADMIN"],
-  "/dashboard/super-admin": ["SUPER_ADMIN"],
+  "/dashboard/courses/create": ["INSTRUCTOR"],
+  "/dashboard/videos/create": ["INSTRUCTOR"],
+
+  "/dashboard/courses/my-courses": ["STUDENT"],
+  "/dashboard/videos": ["STUDENT"],
+
+  "/dashboard/categories": ["ADMIN", "SUPER_ADMIN"],
 };
 
 export function middleware(request: NextRequest) {
@@ -40,12 +25,12 @@ export function middleware(request: NextRequest) {
   const currentPath = request.nextUrl.pathname;
   const loginUrl = new URL("/login", request.url);
 
-  // Allow login page
+  // ✅ Allow login page always
   if (currentPath === "/login") {
     return NextResponse.next();
   }
 
-  // No token → redirect
+  // ❌ No token → redirect to login
   if (!token) {
     return NextResponse.redirect(loginUrl);
   }
@@ -54,14 +39,18 @@ export function middleware(request: NextRequest) {
 
   try {
     userInfo = jwtDecode(token);
-  } catch  {
+  } catch {
     return NextResponse.redirect(loginUrl);
   }
 
   const userRole = userInfo?.role;
 
+  if (!userRole) {
+    return NextResponse.redirect(loginUrl);
+  }
+
   // =============================
-  // ROLE CHECKING
+  // STRICT ROLE CHECK
   // =============================
   for (const route in roleAccess) {
     if (currentPath.startsWith(route)) {
