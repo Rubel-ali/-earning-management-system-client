@@ -1,5 +1,7 @@
 'use client';
 
+
+import { useSuperAdminSummaryQuery } from '@/redux/features/dashboard/dashboardApi';
 import {
   LineChart,
   Line,
@@ -16,106 +18,86 @@ import {
   Bar,
 } from 'recharts';
 
-/* =======================
-   DATA
-======================= */
-
-const enrollmentData = [
-  { month: 'Jan', enrollments: 2400, completions: 1200 },
-  { month: 'Feb', enrollments: 3200, completions: 1800 },
-  { month: 'Mar', enrollments: 2800, completions: 1600 },
-  { month: 'Apr', enrollments: 3900, completions: 2200 },
-  { month: 'May', enrollments: 4200, completions: 2600 },
-  { month: 'Jun', enrollments: 4800, completions: 3100 },
-];
-
-const revenueData = [
-  { month: 'Jan', revenue: 12400 },
-  { month: 'Feb', revenue: 15200 },
-  { month: 'Mar', revenue: 14800 },
-  { month: 'Apr', revenue: 18900 },
-  { month: 'May', revenue: 21200 },
-  { month: 'Jun', revenue: 24800 },
-];
-
-const categoryData = [
-  { name: 'Web Development', value: 35 },
-  { name: 'Data Science', value: 25 },
-  { name: 'Design', value: 20 },
-  { name: 'Business', value: 15 },
-  { name: 'Other', value: 5 },
-];
-
-/* Professional Unified Color System */
-const COLORS = [
-  '#2563eb', // Blue
-  '#10b981', // Green
-  '#8b5cf6', // Purple
-  '#f59e0b', // Orange
-  '#ef4444', // Red
-];
-
-const instructorPerformance = [
-  { name: 'Sarah Chen', revenue: 15400, students: 3200, rating: 4.8 },
-  { name: 'Lisa Anderson', revenue: 18450, students: 4100, rating: 4.8 },
-  { name: 'Emma Wilson', revenue: 12600, students: 2800, rating: 4.9 },
-  { name: 'Mike Johnson', revenue: 4800, students: 1200, rating: 4.7 },
-  { name: 'James Lee', revenue: 22100, students: 4900, rating: 4.9 },
-];
+const COLORS = ['#2563eb', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444'];
 
 export default function SuperAdminAnalyticsPage() {
+  const { data, isLoading, isError } = useSuperAdminSummaryQuery();
+
+  if (isLoading) return <div className="p-10">Loading dashboard...</div>;
+  if (isError) return <div className="p-10 text-red-500">Failed to load dashboard</div>;
+
+  const dashboard = data?.data;
+
+  /* =======================
+     Transform API Data
+  ======================= */
+
+  const enrollmentData =
+    dashboard?.enrollmentTrend?.map((item: any) => ({
+      month: item.month,
+      enrollments: item.enrollments,
+    })) || [];
+
+  const revenueData =
+    dashboard?.monthlyRevenue?.map((item: any) => ({
+      month: item.month,
+      revenue: item.revenue,
+    })) || [];
+
+  const categoryData =
+    dashboard?.categoryDistribution?.map((item: any) => ({
+      name: item.categoryId.slice(-6), // যদি category name না থাকে
+      value: item.percentage,
+    })) || [];
+
+  const instructorPerformance =
+    dashboard?.topInstructors?.map((inst: any) => ({
+      name: inst.name,
+      revenue: inst.revenue,
+      students: inst.totalStudents,
+    })) || [];
+
   return (
     <div className="space-y-8">
 
-      {/* =======================
-         HEADER
-      ======================= */}
+      {/* HEADER */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">
-          Platform Analytics
-        </h1>
+        <h1 className="text-3xl font-bold">Platform Analytics</h1>
         <p className="text-muted-foreground">
-          Comprehensive platform-wide analytics and performance metrics
+          Comprehensive platform-wide analytics
         </p>
       </div>
 
-      {/* =======================
-         KPI CARDS
-      ======================= */}
+      {/* KPI CARDS */}
       <div className="grid gap-4 sm:grid-cols-4">
-        {[
-          { title: 'Total Revenue', value: '$97,450', growth: '+18% vs last month' },
-          { title: 'Total Enrollments', value: '24,400', growth: '+12% vs last month' },
-          { title: 'Completion Rate', value: '65.2%', growth: '+3% vs last month' },
-          { title: 'Active Instructors', value: '42', growth: '+4 this month' },
-        ].map((card, i) => (
-          <div key={i} className="rounded-lg border border-border bg-card p-6">
-            <div className="text-xs font-medium text-muted-foreground mb-2">
-              {card.title}
-            </div>
-            <div className="text-3xl font-bold text-foreground mb-2">
-              {card.value}
-            </div>
-            <div className="text-xs text-green-600">{card.growth}</div>
-          </div>
-        ))}
+        <KpiCard
+          title="Total Revenue"
+          value={`$${dashboard?.overview?.totalRevenue}`}
+        />
+        <KpiCard
+          title="Total Enrollments"
+          value={dashboard?.overview?.totalEnrollments}
+        />
+        <KpiCard
+          title="Total Courses"
+          value={dashboard?.overview?.totalCourses}
+        />
+        <KpiCard
+          title="Total Users"
+          value={dashboard?.overview?.totalUsers}
+        />
       </div>
 
-      {/* =======================
-         CHARTS
-      ======================= */}
+      {/* CHARTS */}
       <div className="grid gap-6 lg:grid-cols-2">
 
         {/* Enrollment Trend */}
-        <div className="rounded-lg border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">
-            Enrollment Trend
-          </h2>
+        <ChartCard title="Enrollment Trend">
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={enrollmentData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="month" stroke="var(--muted-foreground)" />
-              <YAxis stroke="var(--muted-foreground)" />
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
               <Tooltip />
               <Legend />
               <Line
@@ -124,26 +106,17 @@ export default function SuperAdminAnalyticsPage() {
                 stroke="#2563eb"
                 strokeWidth={3}
               />
-              <Line
-                type="monotone"
-                dataKey="completions"
-                stroke="#10b981"
-                strokeWidth={3}
-              />
             </LineChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
-        {/* Revenue Trend */}
-        <div className="rounded-lg border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">
-            Monthly Revenue
-          </h2>
+        {/* Monthly Revenue */}
+        <ChartCard title="Monthly Revenue">
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={revenueData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="month" stroke="var(--muted-foreground)" />
-              <YAxis stroke="var(--muted-foreground)" />
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
               <Tooltip />
               <Bar
                 dataKey="revenue"
@@ -152,24 +125,19 @@ export default function SuperAdminAnalyticsPage() {
               />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
         {/* Category Distribution */}
-        <div className="rounded-lg border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">
-            Course Category Distribution
-          </h2>
+        <ChartCard title="Course Category Distribution">
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
                 data={categoryData}
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
                 dataKey="value"
+                outerRadius={100}
                 label={({ name, value }) => `${name} ${value}%`}
               >
-                {categoryData.map((_, index) => (
+                {categoryData.map((_: any, index: number) => (
                   <Cell
                     key={index}
                     fill={COLORS[index % COLORS.length]}
@@ -179,44 +147,64 @@ export default function SuperAdminAnalyticsPage() {
               <Tooltip />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
 
         {/* Top Instructors */}
-        <div className="rounded-lg border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">
-            Top Instructors by Revenue
-          </h2>
+        <ChartCard title="Top Instructors by Revenue">
           <div className="space-y-4">
-            {instructorPerformance.map((instructor, idx) => (
-              <div key={idx} className="border-b border-border pb-4 last:border-0">
+            {instructorPerformance.map((inst: any, idx: number) => (
+              <div key={idx} className="border-b pb-4 last:border-0">
                 <div className="flex justify-between mb-2">
-                  <h3 className="font-medium text-foreground">
-                    {instructor.name}
-                  </h3>
-                  <span className="text-sm font-bold text-primary">
-                    ${instructor.revenue.toLocaleString()}
+                  <h3 className="font-medium">{inst.name}</h3>
+                  <span className="font-bold">
+                    ${inst.revenue?.toFixed(2)}
                   </span>
                 </div>
+
                 <div className="w-full bg-muted rounded-full h-2 mb-2">
                   <div
                     className="bg-primary h-2 rounded-full"
                     style={{
-                      width: `${(instructor.revenue / 25000) * 100}%`,
+                      width: `${
+                        (inst.revenue /
+                          (dashboard?.overview?.totalRevenue || 1)) *
+                        100
+                      }%`,
                     }}
                   />
                 </div>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>
-                    {instructor.students.toLocaleString()} students
-                  </span>
-                  <span>★ {instructor.rating}</span>
+
+                <div className="text-xs text-muted-foreground">
+                  {inst.students} students
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </ChartCard>
 
       </div>
+    </div>
+  );
+}
+
+/* =======================
+   Reusable Components
+======================= */
+
+function KpiCard({ title, value }: any) {
+  return (
+    <div className="rounded-lg border bg-card p-6">
+      <div className="text-xs text-muted-foreground mb-2">{title}</div>
+      <div className="text-3xl font-bold">{value}</div>
+    </div>
+  );
+}
+
+function ChartCard({ title, children }: any) {
+  return (
+    <div className="rounded-lg border bg-card p-6">
+      <h2 className="text-lg font-semibold mb-4">{title}</h2>
+      {children}
     </div>
   );
 }

@@ -26,6 +26,11 @@ const LoginForm = () => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+  });
+
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLogIn("Loading...");
@@ -34,8 +39,14 @@ const LoginForm = () => {
     const email = formData.get("email")?.toString().trim();
     const password = formData.get("password")?.toString();
 
+    const newErrors = {
+      email: !email ? "Email is required" : "",
+      password: !password ? "Password is required" : "",
+    };
+
+    setErrors(newErrors);
+
     if (!email || !password) {
-      ShowToastify({ error: "Email and password are required." });
       setLogIn("Login");
       return;
     }
@@ -69,36 +80,29 @@ const LoginForm = () => {
         throw new Error("Unauthorized role");
       }
 
-      // Save role in redux
       dispatch(setUser({ role: userInfo.role }));
-
-      // Save token in cookie
       Cookies.set("token", token, { expires: 7 });
 
-      // ✅ Correct Redirect According To Folder
       switch (userInfo.role) {
         case "SUPER_ADMIN":
           router.push("/dashboard/super-admin");
           break;
-
         case "ADMIN":
           router.push("/dashboard/admin");
           break;
-
         case "INSTRUCTOR":
           router.push("/dashboard/instructor");
           break;
-
         case "STUDENT":
           router.push("/dashboard/student");
           break;
-
         default:
           router.push("/login");
       }
 
       ShowToastify({ success: "Login successful!" });
-    } catch (error) {
+
+    } catch {
       dispatch(logOut());
       ShowToastify({ error: "Check your email or password." });
       setLogIn("Login");
@@ -108,33 +112,38 @@ const LoginForm = () => {
   return (
     <form onSubmit={handleLogin} className="mt-8 space-y-6">
       <div className="space-y-4 rounded-md">
+
         {/* Email */}
         <div>
-          <label htmlFor="email" className="text-sm text-gray-500">
+          <label className="text-sm text-gray-500">
             Email
           </label>
           <input
-            id="email"
             name="email"
             type="email"
-            placeholder="info@email.com"
-            required
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+            className={`mt-1 block w-full rounded-md border px-3 py-2 ${
+              errors.email ? "border-red-500" : "border-gray-300"
+            }`}
           />
+          {errors.email && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.email}
+            </p>
+          )}
         </div>
 
         {/* Password */}
         <div>
-          <label htmlFor="password" className="text-sm text-gray-500">
+          <label className="text-sm text-gray-500">
             Password
           </label>
           <div className="relative">
             <input
-              id="password"
               name="password"
               type={showPassword ? "text" : "password"}
-              required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              className={`mt-1 block w-full rounded-md border px-3 py-2 ${
+                errors.password ? "border-red-500" : "border-gray-300"
+              }`}
             />
             <div className="absolute right-3 top-3">
               <button
@@ -145,6 +154,11 @@ const LoginForm = () => {
               </button>
             </div>
           </div>
+          {errors.password && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.password}
+            </p>
+          )}
         </div>
       </div>
 

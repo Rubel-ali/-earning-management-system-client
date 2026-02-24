@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { IUserResponse } from "@/types/user.types";
 import baseApi from "../api/baseApi";
 
 const userApi = baseApi.injectEndpoints({
@@ -21,6 +22,22 @@ const userApi = baseApi.injectEndpoints({
       }),
     }),
 
+    allUsers: build.query<{ data: IUserResponse }, void>({
+      query: () => ({
+        url: `/users`,
+        method: "GET",
+      }),
+      providesTags: ["allUsers"],
+    }),
+
+    deleteUser: build.mutation({
+      query: (id: string) => ({
+        url: `/users/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["allUsers"],
+    }),
+
     registerUser: build.mutation({
       query: (data: any) => ({
         url: "/users/register",
@@ -29,24 +46,24 @@ const userApi = baseApi.injectEndpoints({
       }),
     }),
 
-    allUsers: build.query({
-      query: () => ({
-        url: `/users`,
-        method: "GET",
-      }),
-      providesTags: ["allUsers"],
-    }),
-
+    // allUsers: build.query({
+    //   query: () => ({
+    //     url: `/users`,
+    //     method: "GET",
+    //   }),
+    //   providesTags: ["allUsers"],
+    // }),
 
     userStatusUpdate: build.mutation({
-      query: ({id, body}) => ({  // Changed from 'data' to 'body' to match your usage
+      query: ({ id, body }) => ({
+        // Changed from 'data' to 'body' to match your usage
         url: `/users/user-status/${id}`,
         method: "PUT",
         body,
       }),
       invalidatesTags: (result, error, arg) => [
-        { type: 'allUsers', id: arg.id },
-        'allUsers'
+        { type: "userStatus", id: arg.id },
+        "allUsers",
       ],
     }),
 
@@ -65,7 +82,6 @@ const userApi = baseApi.injectEndpoints({
       }),
     }),
 
-
     verifyOtp: build.mutation({
       query: (data: { email: string; otp: number }) => ({
         url: "/auth/verify-otp",
@@ -73,7 +89,7 @@ const userApi = baseApi.injectEndpoints({
         body: data,
       }),
     }),
-    
+
     resetPassword: build.mutation({
       query: (data: { password: string }) => ({
         url: "/auth/reset-password",
@@ -87,7 +103,7 @@ const userApi = baseApi.injectEndpoints({
         url: `/users/profile`,
         method: "PUT",
         body: formData,
-      }), 
+      }),
     }),
   }),
 });
@@ -95,6 +111,7 @@ const userApi = baseApi.injectEndpoints({
 export const {
   useLoginUserMutation,
   useLogoutUserMutation,
+  useDeleteUserMutation,
   useRegisterUserMutation,
   useAllUsersQuery,
   useUserStatusUpdateMutation,
