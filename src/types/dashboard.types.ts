@@ -31,6 +31,22 @@ export interface ISuperAdminDashboardResponse {
   topInstructors: { name: string; revenue: number; totalStudents: number }[];
 }
 
+export interface IRevenueByCourse {
+  courseId: string;
+  title: string;
+  revenue: number;
+}
+
+export interface IInstructorAnalytics {
+  totalStudents: number;
+  totalCompletions: number;
+  completionRate: number;
+  avgRating: number;
+  totalReviews: number;
+  totalRevenue: number;
+  revenueByCourse: IRevenueByCourse[];
+}
+
 export interface IOverview {
   totalUsers: number;
   totalRevenue: number;

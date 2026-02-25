@@ -29,7 +29,20 @@ const dashboardApi = baseApi.injectEndpoints({
       }),
       providesTags: ["instructorSummary"],
     }),
+
+    instructorAnalytics: build.query({
+      query: () => ({
+        url: "/dashboard/instructor-analytics",
+        method: "GET",
+      }),
+      providesTags: ["instructorAnalytics"],
+    }),
   }),
 });
 
-export const { useSuperAdminSummaryQuery, useAdminSummaryQuery, useInstructorSummaryQuery } = dashboardApi;
+export const {
+  useSuperAdminSummaryQuery,
+  useAdminSummaryQuery,
+  useInstructorSummaryQuery,
+  useInstructorAnalyticsQuery,
+} = dashboardApi;

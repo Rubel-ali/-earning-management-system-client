@@ -2,26 +2,32 @@ import baseApi from "../api/baseApi";
 
 const lessonApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    courses: build.query({
-      query: () => ({
-        url: "/courses/draft",
-        method: "GET",
+    createVideo: build.mutation({
+      query: ({ courseId, formData }) => ({
+        url: `/videos/${courseId}`,
+        method: "POST",
+        body: formData,
       }),
-      providesTags: ["allCourses"],
+      invalidatesTags: ["allVideos", "singleCourse"],
     }),
 
-    createVideo: build.mutation({
-        query: (data: any) => ({
-            url: "/lessons/create-lesson",
-            method: "POST",
-            body: data,
-        }),
-        invalidatesTags: ["allVideos"],
+    allVideos: build.query({
+      query: () => `/videos`,
+      providesTags: ["allVideos"],
     }),
-    
+
+    deleteVideo: build.mutation({
+      query: (id: string) => ({
+        url: `/videos/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["allVideos"],
+    }),
   }),
 });
 
 export const {
-  useCoursesQuery,
+  useCreateVideoMutation,
+  useAllVideosQuery,
+  useDeleteVideoMutation,
 } = lessonApi;
