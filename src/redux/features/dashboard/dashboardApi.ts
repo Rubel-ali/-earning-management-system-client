@@ -13,7 +13,23 @@ const dashboardApi = baseApi.injectEndpoints({
       }),
       providesTags: ["superAdminSummary"],
     }),
+
+    adminSummary: build.query({
+      query: () => ({
+        url: "/dashboard/admin-dashboard",
+        method: "GET",
+      }),
+      providesTags: ["adminSummary"],
+    }),
+
+    instructorSummary: build.query({
+      query: () => ({
+        url: "/dashboard/instructor-dashboard",
+        method: "GET",
+      }),
+      providesTags: ["instructorSummary"],
+    }),
   }),
 });
 
-export const { useSuperAdminSummaryQuery } = dashboardApi;
+export const { useSuperAdminSummaryQuery, useAdminSummaryQuery, useInstructorSummaryQuery } = dashboardApi;

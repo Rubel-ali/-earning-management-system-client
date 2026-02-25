@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Mail, Phone, Edit2, Trash2, CheckCircle, XCircle, TrendingUp, Users, Award } from 'lucide-react';
+import { Search, Mail, Phone, Edit2, CheckCircle, XCircle, TrendingUp, Users, Award } from 'lucide-react';
 
 export default function AdminManageInstructorsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,7 +97,7 @@ export default function AdminManageInstructorsPage() {
   const handleApproveInstructor = (instructorId: number) => {
     setInstructors(instructors.map(instructor =>
       instructor.id === instructorId
-        ? { ...instructor, status: 'active' }
+        ? { ...instructor, status: 'ACTIVE' }
         : instructor
     ));
   };
@@ -105,7 +105,7 @@ export default function AdminManageInstructorsPage() {
   const handleSuspendInstructor = (instructorId: number) => {
     setInstructors(instructors.map(instructor =>
       instructor.id === instructorId
-        ? { ...instructor, status: 'suspended' }
+        ? { ...instructor, status: 'SUSPENDED' }
         : instructor
     ));
   };

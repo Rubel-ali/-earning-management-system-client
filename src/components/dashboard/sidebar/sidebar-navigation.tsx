@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import {
-  Home,
   Users,
   LogOut,
   Briefcase,
   GraduationCap,
   Shield,
+  Video,
+  Tags,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -17,6 +18,8 @@ import { useDispatch, useSelector } from "react-redux";
 import Cookies from "js-cookie";
 import { AppDispatch, RootState } from "@/redux/store";
 import { logOut } from "@/redux/ReduxFunction";
+import { IoAnalytics } from "react-icons/io5";
+import { FaBarsProgress } from "react-icons/fa6";
 
 interface SidebarProps {
   className?: string;
@@ -42,7 +45,7 @@ export default function SidebarNavigation({ className }: SidebarProps) {
     SUPER_ADMIN: [
       { name: "Dashboard", href: "/dashboard/super-admin", icon: Shield },
       { name: "Users", href: "/dashboard/super-admin/users", icon: Users },
-      { name: "Analytics", href: "/dashboard/super-admin/analytics", icon: Home },
+      { name: "Analytics", href: "/dashboard/super-admin/analytics", icon: IoAnalytics },
     ],
 
     ADMIN: [
@@ -54,13 +57,15 @@ export default function SidebarNavigation({ className }: SidebarProps) {
     INSTRUCTOR: [
       { name: "Dashboard", href: "/dashboard/instructor", icon: Briefcase },
       { name: "Courses", href: "/dashboard/instructor/courses", icon: GraduationCap },
-      { name: "Analytics", href: "/dashboard/instructor/analytics", icon: Home },
+      { name: "Lessons", href: "/dashboard/instructor/lessons", icon: Video },
+      { name: "Categories", href: "/dashboard/instructor/categories", icon: Tags },
+      { name: "Analytics", href: "/dashboard/instructor/analytics", icon: IoAnalytics },
     ],
 
     STUDENT: [
       { name: "Dashboard", href: "/dashboard/student", icon: GraduationCap },
       { name: "My Courses", href: "/dashboard/student/courses", icon: Briefcase },
-      { name: "Progress", href: "/dashboard/student/progress", icon: Home },
+      { name: "Progress", href: "/dashboard/student/progress", icon: FaBarsProgress },
     ],
   };
 

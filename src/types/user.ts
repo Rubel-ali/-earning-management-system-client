@@ -1,7 +1,8 @@
 export interface IUser {
   userId: string;
-  name: string;
+  userName: string;
   email: string;
+  profileImage?: string;
   hasShop?: boolean;
   isActive?: boolean;
   role: "user" | "admin";
