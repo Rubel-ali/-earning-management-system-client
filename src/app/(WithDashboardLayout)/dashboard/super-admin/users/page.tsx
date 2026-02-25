@@ -88,7 +88,7 @@ export default function UserListTable() {
   }
 
   const users = usersData?.data?.data || []
-  const totalUsers = usersData?.meta?.total || 0
+  // const totalUsers = usersData?.meta?.total || 0
 
   return (
     <div className="w-full">
@@ -172,7 +172,7 @@ export default function UserListTable() {
           {/* Pagination controls */}
           <div className="flex justify-between min-h-screen items-center mt-4">
             <div className="text-sm text-gray-500">
-              Showing {users.length} of {totalUsers} users
+              {/* Showing {users.length} of {totalUsers} users */}
             </div>
             <div className="flex gap-2">
               <Button
@@ -184,7 +184,7 @@ export default function UserListTable() {
               </Button>
               <Button
                 variant="outline"
-                disabled={!usersData?.meta?.hasNextPage}
+                // disabled={!usersData?.meta?.hasNextPage}
                 onClick={() => setPage(p => p + 1)}
               >
                 Next
