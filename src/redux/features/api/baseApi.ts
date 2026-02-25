@@ -43,6 +43,10 @@ export const baseApi = createApi({
     "instructorSummary",
     "singleCourse",
     "instructorAnalytics",
+    "myCourses",
+    "topCourses",
+    "progress",
+    "studentSummary",
   ],
 });
 

@@ -37,6 +37,14 @@ const dashboardApi = baseApi.injectEndpoints({
       }),
       providesTags: ["instructorAnalytics"],
     }),
+
+    studentSummary: build.query({
+      query: () => ({
+        url: "/dashboard/student-dashboard",  
+        method: "GET",
+      }),
+      providesTags: ["studentSummary"],
+    }),
   }),
 });
 
@@ -45,4 +53,5 @@ export const {
   useAdminSummaryQuery,
   useInstructorSummaryQuery,
   useInstructorAnalyticsQuery,
+  useStudentSummaryQuery,
 } = dashboardApi;

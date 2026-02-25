@@ -10,6 +10,14 @@ const courseApi = baseApi.injectEndpoints({
       providesTags: ["allCourses"],
     }),
 
+    allPubsishedCourses: build.query({
+      query: () => ({
+        url: "/courses",
+        method: "GET",
+      }),
+      providesTags: ["allCourses"],
+    }),
+
     singleCourse: build.query({
       query: (id: string) => ({
         url: `/courses/${id}`,
@@ -34,7 +42,6 @@ const courseApi = baseApi.injectEndpoints({
       }),
       providesTags: ["allCategories"],
     }),
-
 
     deleteCourse: build.mutation({
       query: (id: string) => ({
@@ -61,15 +68,62 @@ const courseApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["allCourses", "singleCourse"],
     }),
+
+    myPurchasedCourses: build.query({
+      query: () => ({
+        url: "/courses/my-purchased",
+        method: "GET",
+      }),
+      providesTags: ["myCourses"],
+    }),
+
+    topReviewedCourses: build.query({
+      query: () => ({
+        url: "/courses/top-reviewed",
+        method: "GET",
+      }),
+      providesTags: ["topCourses"],
+    }),
+
+    studentProgress: build.query({
+      query: () => ({
+        url: "/courses/student-progress",
+        method: "GET",
+      }),
+      providesTags: ["progress"],
+    }),
+
+    studentAnalytics: build.query({
+      query: () => ({
+        url: "/dashboard/student-analytics",
+        method: "GET",
+      }),
+      providesTags: ["progress"],
+    }),
+
+    buyCourse: build.mutation({
+      query: (body) => ({
+        url: `/courses/buy`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["myCourses"],
+    }),
   }),
 });
 
 export const {
   useCoursesQuery,
+  useAllPubsishedCoursesQuery,
   useSingleCourseQuery,
   useUpdateStatusMutation,
   useCreateCourseMutation,
   useCategoriesQuery,
   useDeleteCourseMutation,
   useUpdateCourseMutation,
+  useMyPurchasedCoursesQuery,
+  useTopReviewedCoursesQuery,
+  useStudentProgressQuery,
+  useStudentAnalyticsQuery,
+  useBuyCourseMutation,
 } = courseApi;
